@@ -22,20 +22,23 @@ class Extension extends CompilerExtension
 
   public function loadConfiguration()
   {
-    $config = $this->getConfig($this->defaults);
+    $this->validateConfig($this->defaults);
+
+    $config = $this->config;
+
     $builder = $this->getContainerBuilder();
 
     $translator = $builder->addDefinition($this->prefix('translator'));
-    $translator->setClass('GettextTranslator\Gettext', array('@session', '@cacheStorage', '@httpResponse'));
+    $translator->setFactory('GettextTranslator\Gettext', array('@session', '@cacheStorage', '@httpResponse'));
     $translator->addSetup('setLang', array($config['lang']));
-    $translator->addSetup('setProductionMode', array($builder->expand('%productionMode%')));
+    $translator->addSetup('setProductionMode', array('%productionMode%'));
 
     foreach ($config['files'] AS $id => $file)
     {
       $translator->addSetup('addFile', array($file, $id));
     }
 
-    $translator->addSetup('GettextTranslator\Panel::register', array('@application', '@self', '@session', '@httpRequest', $config['layout'], $config['height']));
+    // $translator->addSetup('GettextTranslator\Panel::register', array('@application', '@self', '@session', '@httpRequest', $config['layout'], $config['height']));
   }
 
 }
